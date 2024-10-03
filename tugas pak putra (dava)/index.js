@@ -1,45 +1,42 @@
 const readline = require("readline-sync");
 
-let history = []; 
-let previousResult = null; 
+let history = [];
+let previousResult = null;
 
-while (true) {
-  const angkaPertama = previousResult !== null ? previousResult : parseFloat(readline.question("Masukkan angka pertama: "));
-  const operator = readline.question("Pilih operator (+, -, *, /, %) : ");
-  const angkaKedua = parseFloat(readline.question("Masukkan angka kedua: "));
+function displayMenu() {
+  console.log("\n===== KALKULATOR =====");
+  console.log("1. Hitung");
+  console.log("2. Riwayat");
+  console.log("3. Keluar");
+}
 
-  const requiredOperator = ["+", "-", "*", "/", "%"];
+function getUserChoice() {
+  const choice = readline.question("Pilih opsi (1/2/3): ");
+  return choice;
+}
 
-  if (isNaN(angkaPertama) || isNaN(angkaKedua)) {
-    console.log("Inputan Anda tidak valid. Harap masukkan angka.");
-    continue;
-  } else if (!requiredOperator.includes(operator)) {
-    console.log("Pilih sesuai operator yang tersedia.");
-    continue;
-  }
-
-  let hasil;
-  try {
-    hasil = processHasil(angkaPertama, angkaKedua, operator);
-  } catch (e) {
-    console.log(e.message);
-    continue;
-  }
-
-  console.log(`Hasilnya adalah ${hasil}`);
-  history.push(`${angkaPertama} ${operator} ${angkaKedua} = ${hasil}`);
-  previousResult = hasil;
-
-  const choice = readline.question("Lanjutkan perhitungan? (y/n) : ");
-  if (choice.toLowerCase() !== 'y') {
-    break;
+function getNumber(prompt) {
+  let number;
+  while (true) {
+    number = parseFloat(readline.question(prompt));
+    if (!isNaN(number)) {
+      return number;
+    }
+    console.log("Inputan tidak valid. Harap masukkan angka.");
   }
 }
 
-console.log("Riwayat kalkulasi:");
-history.forEach((item, index) => {
-  console.log(`${index + 1}. ${item}`);
-});
+function getOperator() {
+  const validOperators = ["+", "-", "*", "/", "%"];
+  let operator;
+  while (true) {
+    operator = readline.question("Pilih operator (+, -, *, /, %): ");
+    if (validOperators.includes(operator)) {
+      return operator;
+    }
+    console.log("Operator tidak valid. Silakan pilih dari operator yang tersedia.");
+  }
+}
 
 function processHasil(inputanPertama, inputanKedua, operator) {
   switch (operator) {
@@ -51,12 +48,46 @@ function processHasil(inputanPertama, inputanKedua, operator) {
       return inputanPertama * inputanKedua;
     case "/":
       if (inputanKedua === 0) {
-        throw new Error("Angka kedua tidak boleh bernilai 0.");
+        throw new Error("Kesalahan: Angka kedua tidak boleh bernilai 0.");
       }
       return inputanPertama / inputanKedua;
     case "%":
       return inputanPertama % inputanKedua;
     default:
       throw new Error("Operator tidak valid.");
+  }
+}
+
+while (true) {
+  displayMenu();
+  const choice = getUserChoice();
+
+  if (choice === '1') {
+    const angkaPertama = previousResult !== null ? previousResult : getNumber("Masukkan angka pertama: ");
+    const operator = getOperator();
+    const angkaKedua = getNumber("Masukkan angka kedua: ");
+
+    let hasil;
+    try {
+      hasil = processHasil(angkaPertama, angkaKedua, operator);
+      console.log(`Hasilnya adalah: ${hasil}`);
+      history.push(`${angkaPertama} ${operator} ${angkaKedua} = ${hasil}`);
+      previousResult = hasil;
+    } catch (e) {
+      console.log(e.message);
+    }
+
+  } else if (choice === '2') {
+    console.log("\nRiwayat kalkulasi:");
+    history.forEach((item, index) => {
+      console.log(`${index + 1}. ${item}`);
+    });
+
+  } else if (choice === '3') {
+    console.log("Terima kasih telah menggunakan kalkulator!");
+    break;
+
+  } else {
+    console.log("Pilihan tidak valid. Silakan pilih lagi.");
   }
 }
